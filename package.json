@@ -12,12 +12,12 @@
     "Uğur Şahinkaya <ugur@sahinkaya.xyz>",
     "Yusuf Kandemir <yusuf.kandemir@outlook.com.tr>"
   ],
-  "homepage": "https://github.com/ugursahinkaya/corepack#readme",
+  "homepage": "https://github.com/ugursahinkaya/secure-socket-server#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ugursahinkaya/corepack.git"
+    "url": "git+https://github.com/ugursahinkaya/secure-socket-server.git"
   },
-  "bugs": "https://github.com/ugursahinkaya/corepack/issues",
+  "bugs": "https://github.com/ugursahinkaya/secure-socket-server/issues",
   "keywords": [],
   "exports": {
     ".": {
