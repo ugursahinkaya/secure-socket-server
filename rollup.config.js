@@ -12,15 +12,10 @@ export default [
     input: "src/index.ts",
     output: [
       {
-        file: "dist/index.cjs",
-        format: "cjs",
-      },
-      {
         file: "dist/index.js",
         format: "es",
       },
     ],
-    external: ["@ugursahinkaya/generic-router", "@ugursahinkaya/secure-fetch"],
     plugins: [
       typescript({
         tsconfig: "./tsconfig.json",

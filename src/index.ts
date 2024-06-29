@@ -1,6 +1,6 @@
 import { IncomingMessage, createServer } from "http";
 import { WebSocketServer, WebSocket } from "ws";
-import { ChatConsumer } from "./chat-consumer";
+import { ChatConsumer } from "./chat-consumer.js";
 import { base64ToArrayBuffer } from "@ugursahinkaya/utils";
 import { SecureAuth } from "@ugursahinkaya/secure-auth";
 
@@ -31,7 +31,7 @@ const server = createServer();
 
 const wss = new WebSocketServer({ server });
 const consumers = new Map<string, ChatConsumer>();
-const phones = new Map<string, string>();
+const usernames = new Map<string, string>();
 wss.on("connection", async (ws: ExtWebSocket, req: IncomingMessage) => {
   const queryToken = req.url?.replace("ws", "").replaceAll("/", "");
 
@@ -41,13 +41,13 @@ wss.on("connection", async (ws: ExtWebSocket, req: IncomingMessage) => {
     return;
   }
   ws.consumer = consumers.get(queryToken) ?? new ChatConsumer(queryToken, ws);
-  if (!ws.consumer.user?.phone) {
+  if (!ws.consumer.user?.username) {
     await ws.consumer.init();
   }
-  console.log(ws.consumer.user?.phone, "connected");
+  console.log(ws.consumer.user?.username, "connected");
 
   if (
-    ws.consumer.user?.phone === undefined ||
+    ws.consumer.user?.username === undefined ||
     ws.consumer.publicKey === undefined
   ) {
     console.log("Consumer is invalid. Closing socket");
@@ -55,7 +55,7 @@ wss.on("connection", async (ws: ExtWebSocket, req: IncomingMessage) => {
     return;
   }
   consumers.set(queryToken, ws.consumer);
-  phones.set(ws.consumer.user?.phone, queryToken);
+  usernames.set(ws.consumer.user?.username, queryToken);
   ws.send(ws.consumer.publicKey);
 
   ws.on("pong", () => {
@@ -98,7 +98,7 @@ wss.on("connection", async (ws: ExtWebSocket, req: IncomingMessage) => {
         }
         return;
       }
-      const receiver = phones.get(decrypted.receiver);
+      const receiver = usernames.get(decrypted.receiver);
       if (!receiver) {
         const [ciphertext, iv] = await ws.consumer.encrypt(
           JSON.stringify({
@@ -118,7 +118,7 @@ wss.on("connection", async (ws: ExtWebSocket, req: IncomingMessage) => {
         const [ciphertext, iv] = await receiverConsumerObj.encrypt(
           JSON.stringify({
             body: decrypted.body,
-            sender: ws.consumer.user?.phone,
+            sender: ws.consumer.user?.username,
             receiver: decrypted.receiver,
             sent: new Date(),
             process: decrypted.process,
@@ -164,7 +164,7 @@ const interval = setInterval(() => {
           return;
         }
         console.log(
-          `ping error on ${extWs.consumer.user?.phone} connection : ${err}`
+          `ping error on ${extWs.consumer.user?.username} connection : ${err}`
         );
         ws.close(1002, "ping error");
       });

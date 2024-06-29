@@ -22,7 +22,7 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "node": "./dist/index.cjs",
+      "node": "./dist/index.js",
       "default": "./dist/index.js"
     }
   },

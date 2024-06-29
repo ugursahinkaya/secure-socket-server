@@ -3,7 +3,7 @@
     "baseUrl": ".",
     "outDir": "dist",
     "target": "ES2022",
-    "lib": ["DOM", "ES6"],
+    "lib": ["DOM", "ESNext"],
     "types": ["node"],
     "module": "ESNext",
     "moduleResolution": "Node",
