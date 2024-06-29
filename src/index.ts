@@ -31,7 +31,7 @@ const server = createServer();
 
 const wss = new WebSocketServer({ server });
 const consumers = new Map<string, ChatConsumer>();
-const usernames = new Map<string, string>();
+const userNames = new Map<string, string>();
 wss.on("connection", async (ws: ExtWebSocket, req: IncomingMessage) => {
   const queryToken = req.url?.replace("ws", "").replaceAll("/", "");
 
@@ -41,13 +41,13 @@ wss.on("connection", async (ws: ExtWebSocket, req: IncomingMessage) => {
     return;
   }
   ws.consumer = consumers.get(queryToken) ?? new ChatConsumer(queryToken, ws);
-  if (!ws.consumer.user?.username) {
+  if (!ws.consumer.user?.userName) {
     await ws.consumer.init();
   }
-  console.log(ws.consumer.user?.username, "connected");
+  console.log(ws.consumer.user?.userName, "connected");
 
   if (
-    ws.consumer.user?.username === undefined ||
+    ws.consumer.user?.userName === undefined ||
     ws.consumer.publicKey === undefined
   ) {
     console.log("Consumer is invalid. Closing socket");
@@ -55,7 +55,7 @@ wss.on("connection", async (ws: ExtWebSocket, req: IncomingMessage) => {
     return;
   }
   consumers.set(queryToken, ws.consumer);
-  usernames.set(ws.consumer.user?.username, queryToken);
+  userNames.set(ws.consumer.user?.userName, queryToken);
   ws.send(ws.consumer.publicKey);
 
   ws.on("pong", () => {
@@ -98,7 +98,7 @@ wss.on("connection", async (ws: ExtWebSocket, req: IncomingMessage) => {
         }
         return;
       }
-      const receiver = usernames.get(decrypted.receiver);
+      const receiver = userNames.get(decrypted.receiver);
       if (!receiver) {
         const [ciphertext, iv] = await ws.consumer.encrypt(
           JSON.stringify({
@@ -118,7 +118,7 @@ wss.on("connection", async (ws: ExtWebSocket, req: IncomingMessage) => {
         const [ciphertext, iv] = await receiverConsumerObj.encrypt(
           JSON.stringify({
             body: decrypted.body,
-            sender: ws.consumer.user?.username,
+            sender: ws.consumer.user?.userName,
             receiver: decrypted.receiver,
             sent: new Date(),
             process: decrypted.process,
@@ -164,7 +164,7 @@ const interval = setInterval(() => {
           return;
         }
         console.log(
-          `ping error on ${extWs.consumer.user?.username} connection : ${err}`
+          `ping error on ${extWs.consumer.user?.userName} connection : ${err}`
         );
         ws.close(1002, "ping error");
       });
