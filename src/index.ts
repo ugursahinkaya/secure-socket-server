@@ -22,9 +22,10 @@ export const authApi = new SecureAuth(authProvider, {
   saveRefreshToken(token) {
     refreshToken = token;
   },
-  loginOrRegister() {
-    console.log("loginOrRegister!");
-    void authApi.refresh(refreshToken!);
+  async loginOrRegister() {
+    console.log("socket server loginOrRegister!");
+    const res = await authApi.refresh(refreshToken!);
+    console.log(res);
   },
 });
 const server = createServer();

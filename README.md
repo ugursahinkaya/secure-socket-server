@@ -1,4 +1,8 @@
-Commercial License
+# Secure Socket Server
+
+## License
+
+### Commercial License
 
 If you intend to use this software for a commercial project or commercial purposes, you need to obtain a commercial license.
 
@@ -6,7 +10,7 @@ The commercial license covers the commercial use, integration, and distribution 
 
 For more information on commercial license fees and conditions, please contact us at: [ugur@sahinkaya.xyz](mailto:ugur@sahinkaya.xyz)
 
-Open Source License
+### Open Source License
 
 This software is available for free under the GNU General Public License version 3 (GPLv3).
 
