@@ -23,9 +23,7 @@ export const authApi = new SecureAuth(authProvider, {
     refreshToken = token;
   },
   async loginOrRegister() {
-    console.log("socket server loginOrRegister!");
-    const res = await authApi.refresh(refreshToken!);
-    console.log(res);
+    await authApi.refresh(refreshToken!);
   },
 });
 const server = createServer();
@@ -73,7 +71,6 @@ wss.on("connection", async (ws: ExtWebSocket, req: IncomingMessage) => {
     const sendUserData = ws.consumer.hasSecret === false;
     const decrypted = await ws.consumer.messageHandler(message);
     if (sendUserData) {
-      console.log("sending user data", ws.consumer.user);
       if (ws.consumer.user) {
         void ws.consumer.send(ws, {
           body: ws.consumer.user,
