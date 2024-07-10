@@ -64,6 +64,8 @@
     "@ugursahinkaya/shared-types": "0.1.0",
     "@ugursahinkaya/utils": "0.1.0",
     "@ugursahinkaya/secure-auth": "0.1.0",
+    "fastify": "^4.28.1",
+    "fastify-plugin": "^4.5.1",
     "dotenv": "^16.4.5",
     "dotenv-expand": "^11.0.6",
     "ws": "^8.17.0"

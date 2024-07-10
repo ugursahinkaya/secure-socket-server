@@ -1,9 +1,9 @@
 import { SocketPayload } from "@ugursahinkaya/shared-types";
 import { CryptoLib } from "@ugursahinkaya/crypto-lib";
-import { ExtWebSocket, authApi } from "./index.js";
+import { ExtWebSocket } from "./index.js";
 
 export class ChatConsumer {
-  user?: Record<string, any> & { userName: string };
+  user?: Record<string, any> & { username: string };
   publicKey?: ArrayBuffer;
   isAlive: boolean;
   lastSeen: Date;
@@ -12,20 +12,23 @@ export class ChatConsumer {
   crypto?: CryptoLib;
   constructor(
     public queryToken: string,
-    public socket: ExtWebSocket
+    public socket: ExtWebSocket,
+    private whoIs: (
+      queryToken: string
+    ) => Promise<{ username?: string; error?: string }>
   ) {
     this.isAlive = true;
     this.lastSeen = new Date();
     this.hasSecret = false;
   }
-  async generateKey(userName: string) {
+  async generateKey(username: string) {
     this.crypto = new CryptoLib();
-    await this.crypto.generateKey(userName);
+    await this.crypto.generateKey(username);
   }
   async messageHandler(message: Buffer) {
     this.lastSeen = new Date();
     await Promise.all(this.promises);
-    if (!this.user?.userName || !this.crypto) {
+    if (!this.user?.username || !this.crypto) {
       console.log("Consumer is invalid. Closing socket");
       return Promise.reject({ code: 1002, reason: "invalid error" });
     }
@@ -36,24 +39,24 @@ export class ChatConsumer {
       const decrypted = (await this.crypto.decryptBuffer(
         message,
         true,
-        this.user.userName
+        this.user.username
       )) as unknown as SocketPayload<any>;
       return decrypted;
     }
   }
   async setSalt(salt: ArrayBufferLike) {
-    if (!this.user?.userName || !this.crypto) {
+    if (!this.user?.username || !this.crypto) {
       console.log("Consumer is invalid. Closing socket");
       return Promise.reject({ code: 1002, reason: "invalid error" });
     }
-    await this.crypto.setSecretSalt(this.user.userName, salt);
+    await this.crypto.setSecretSalt(this.user.username, salt);
   }
   async encrypt(message: string) {
-    if (!this.user?.userName || !this.crypto) {
+    if (!this.user?.username || !this.crypto) {
       console.log("Consumer is invalid. Closing socket");
       return Promise.reject({ code: 1002, reason: "invalid error" });
     }
-    const res = await this.crypto.encrypt(message, this.user.userName);
+    const res = await this.crypto.encrypt(message, this.user.username);
     return res;
   }
 
@@ -66,12 +69,12 @@ export class ChatConsumer {
 
   async importPublicKey(publicKey: Buffer) {
     const promise = new Promise<void>((resolve, reject) => {
-      if (!this.user?.userName || !this.crypto) {
+      if (!this.user?.username || !this.crypto) {
         reject({ code: 1002, reason: "invalid error" });
         return;
       }
       this.crypto
-        .importPublicKey(publicKey, this.user.userName)
+        .importPublicKey(publicKey, this.user.username)
         .then(() => {
           this.hasSecret = true;
           resolve();
@@ -86,20 +89,20 @@ export class ChatConsumer {
 
   async init() {
     await Promise.all(this.promises);
-    const whoIsRes = (await authApi.whoIs(this.queryToken)) as unknown as {
-      userName: string;
+    const whoIsRes = (await this.whoIs(this.queryToken)) as unknown as {
+      username: string;
       error?: string;
     };
     if (whoIsRes.error) {
       this.socket.close(1002, "invalid token");
       return;
     }
-    const userName = whoIsRes.userName;
-    if (!userName) {
+    const username = whoIsRes.username;
+    if (!username) {
       return;
     }
     this.user = whoIsRes;
-    await this.generateKey(userName);
-    this.publicKey = await this.crypto?.exportKey(userName);
+    await this.generateKey(username);
+    this.publicKey = await this.crypto?.exportKey(username);
   }
 }
